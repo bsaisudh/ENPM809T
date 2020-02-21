@@ -19,8 +19,9 @@ def hsv_thresolding_green(frame):
 
     # Thresolding HSV range to get only green mask
     mask_green = cv2.inRange(hsv, lower_green, upper_green)
+    masked_image =  cv2.bitwise_and(image, image, mask=mask_green)
 
-    mask_hsv_comparision = np.hstack((image, hsv, mask_green))
+    mask_hsv_comparision = np.hstack((image, hsv, masked_image))
 
     # Morphological Operation - Opening
     mask_green = cv2.erode(mask_green, None, iterations=2)
@@ -31,7 +32,7 @@ def hsv_thresolding_green(frame):
                                 cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)
     contours = contours[0] if imutils.is_cv2() else contours[1]
-    
+
     # Finding green light
     center = None
 

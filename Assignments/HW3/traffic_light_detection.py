@@ -20,6 +20,8 @@ def hsv_thresolding_green(frame):
     # Thresolding HSV range to get only green mask
     mask_green = cv2.inRange(hsv, lower_green, upper_green)
 
+    mask_hsv_comparision = np.hstack((image, hsv, mask_green))
+
     # Morphological Operation - Opening
     mask_green = cv2.erode(mask_green, None, iterations=2)
     mask_green = cv2.dilate(mask_green, None, iterations=2)
@@ -36,6 +38,7 @@ def hsv_thresolding_green(frame):
     if len(contours) > 0:
         c = max(contours, key=cv2.contourArea)
         ((x, y), radius) = cv2.minEnclosingCircle(c)
+        # Reference : https://stackoverflow.com/questions/22470902/understanding-moments-function-in-opencv
         M = cv2.moments(c)
         center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
 
@@ -51,4 +54,4 @@ def hsv_thresolding_green(frame):
                         (0, 0, 255),
                         -1)
 
-    return image
+    return image, mask_hsv_comparision

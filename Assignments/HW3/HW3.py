@@ -45,11 +45,17 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	# press the 'q' key to stop the video stream
 	if key == ord("q"):
 		break
+	# press 's' key save current frame
+	if key == ord('s'):
+		f_name = f'img_capture/img_capture_{np.random.randint(0,50)}.jpg'
+		print(f'--> save file name : {f_name}')
+		cv2.imwrite(f_name, image)
 	# calculate process time for each frame
 	proc_time.append(time.time()-start)
 	print(f'--> Current frame process time - {proc_time[-1]} S ; Total Time - {proc_time[-1]-video_start_time} S')
 	if time.time() - video_start_time > 40:
-		break
+		# break
+		pass
 	start = time.time()
 
 # cleanup - close camera and close video writer

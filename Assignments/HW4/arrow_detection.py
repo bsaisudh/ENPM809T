@@ -5,7 +5,6 @@ import numpy as np
 def detect_arrow_1(frame):
     """
     Arrow detection using Corners and further detects its orientation
-    @author: Rama Prashanth
     """
     image = frame.copy()
     orientation = ''

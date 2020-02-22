@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # custom imports
-from traffic_light_detection import hsv_thresolding_green
+from traffic_light_detection import threshold_hsv_green
 
 # initialize the Raspberry Pi camera
 camera = PiCamera()
@@ -35,28 +35,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 	image = frame.array
 	# clear the stream in preparation for the next frame
 	rawCapture.truncate(0)
-	# show the frame to our screen
-	image = cv2.flip(image, -1)
-	# cv2.imshow("Frame", image)
-	# key = cv2.waitKey(1) & 0xFF
-	# green detection
-	# green_img, hsv_combined = hsv_thresolding_green(image)
-	# cv2.imshow("Frame 1", green_img)
-	# cv2.imshow("Frame 2", hsv_combined)
 
-	# write frame to video file
-	# out.write(green_img)
-	# press the 'q' key to stop the video stream
-	# if key == ord("q"):
-	# 	break
-	# press 's' key save current frame
-	# if key == ord('s'):
-	# 	# f_name = f'img_capture/img_capture_{frame_num}.jpg'
-	# 	# print(f'--> save file name : {f_name}')
-	# 	# cv2.imwrite(f_name, image)
-	# 	cv2.imwrite(f'masked_img_1.jpg', hsv_combined)
-	# 	cv2.imwrite(f'bounded_img_1.jpg', green_img)
-	# calculate process time for each frame
 	proc_time.append(time.time()-start)
 	print(f'--> Frame {frame_num} process time - {proc_time[-1]} S ; Total Time - {proc_time[-1]-video_start_time} S')
 	if frame_num > 105:

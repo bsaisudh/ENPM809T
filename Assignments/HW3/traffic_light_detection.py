@@ -3,7 +3,7 @@ import numpy as np
 import imutils
 
 
-def hsv_thresolding_green(frame):
+def threshold_hsv_green(frame):
     """
     HSV Thresolding of the Green color in given frame
     """

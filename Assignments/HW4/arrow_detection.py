@@ -27,54 +27,56 @@ def detect_arrow_1(frame):
 
     # Shi-Tomasi Corner Detection
     corners = cv2.goodFeaturesToTrack(blur_img, 100, 0.1, 5)
-    corners = np.int0(corners)
     
-    points_x = []
-    points_y = []
-    
-    for corner in corners:
-        x,y = corner.ravel()
-        points_x.append(x)
-        points_y.append(y)
-        cv2.circle(image, (x,y), 3, (255, 0, 0), -1)
-    
-    arrow_mid_x = int((max(points_x) + min(points_x))/2)
-    arrow_dist_x = max(points_x) - min(points_x)
-    
-    arrow_mid_y = int((max(points_y) + min(points_y))/2)
-    arrow_dist_y = max(points_y) - min(points_y)
-    
-    if arrow_dist_x > arrow_dist_y:
-        west_corners = 0
-        east_corners = 0
+    if corners:
+        corners = np.int0(corners)
+        
+        points_x = []
+        points_y = []
         
         for corner in corners:
-            x, y = corner.ravel()
-            if x < int(arrow_mid_x):
-                west_corners += 1
-            else:
-                east_corners += 1
-
-        if west_corners > east_corners:
-            orientation = 'West'
-        else:
-            orientation = 'East'
-    else:
-        north_corners = 0
-        south_corners = 0
+            x,y = corner.ravel()
+            points_x.append(x)
+            points_y.append(y)
+            cv2.circle(image, (x,y), 3, (255, 0, 0), -1)
         
-        for corner in corners:
-            x, y = corner.ravel()
-            if y < int(arrow_mid_y):
-                north_corners += 1
-            else:
-                south_corners += 1
+        arrow_mid_x = int((max(points_x) + min(points_x))/2)
+        arrow_dist_x = max(points_x) - min(points_x)
+        
+        arrow_mid_y = int((max(points_y) + min(points_y))/2)
+        arrow_dist_y = max(points_y) - min(points_y)
+        
+        if arrow_dist_x > arrow_dist_y:
+            west_corners = 0
+            east_corners = 0
+            
+            for corner in corners:
+                x, y = corner.ravel()
+                if x < int(arrow_mid_x):
+                    west_corners += 1
+                else:
+                    east_corners += 1
 
-        if north_corners > south_corners:
-            orientation = 'North'
+            if west_corners > east_corners:
+                orientation = 'West'
+            else:
+                orientation = 'East'
         else:
-            orientation = 'South'
-    
+            north_corners = 0
+            south_corners = 0
+            
+            for corner in corners:
+                x, y = corner.ravel()
+                if y < int(arrow_mid_y):
+                    north_corners += 1
+                else:
+                    south_corners += 1
+
+            if north_corners > south_corners:
+                orientation = 'North'
+            else:
+                orientation = 'South'
+        
     return image, orientation, mask_hsv_comparision, blur_img_comparision
 
 

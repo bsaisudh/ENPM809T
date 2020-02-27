@@ -28,7 +28,7 @@ def detect_arrow_1(frame):
     # Shi-Tomasi Corner Detection
     corners = cv2.goodFeaturesToTrack(blur_img, 100, 0.1, 5)
     
-    if corners:
+    if corners is not None and len(corners) > 0:
         corners = np.int0(corners)
         
         points_x = []

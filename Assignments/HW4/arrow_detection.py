@@ -307,7 +307,8 @@ def detect_arrow_ellipse(frame):
                     orientation = 'north'
                 else:
                     orientation = 'south'
-      
+            cv2.putText(blur_img, orientation + "\t" + str(angle), (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+            cv2.imshow('warpped_blur', blur_img)
     return image, orientation, mask_hsv_comparision, blur_img_comparision
 
 

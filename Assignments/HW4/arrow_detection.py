@@ -24,8 +24,9 @@ def detect_arrow_1(frame):
     blur_img = cv2.GaussianBlur(mask_green, (11,11), 1)
 
     # Morphological Operation - Opening
-    morph_img = cv2.erode(blur_img, None, iterations=3)
-    morph_img = cv2.dilate(morph_img, None, iterations=3)
+    kernel = np.ones((5,5), np.uint8)
+    morph_img = cv2.erode(blur_img, kernel, iterations=1)
+    morph_img = cv2.dilate(morph_img, kernel, iterations=1)
 
     blur_img_comparision = np.hstack((mask_green, blur_img))
     mask_hsv_comparision = np.hstack((image, hsv, masked_img))

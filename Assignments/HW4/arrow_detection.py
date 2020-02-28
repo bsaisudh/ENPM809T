@@ -49,7 +49,7 @@ def detect_arrow(frame):
         ellipse_center, (MA, ma), angle = cv2.fitEllipse(corners)
         
         # Check if the object detected fits an ellipse (arrow) by a threshold
-        if ma/MA > 1.5:
+        if ma/MA > 1.25:
         
             # Find the momentum to detect the arrow head orientation
             M = cv2.moments(corners)

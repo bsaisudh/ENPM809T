@@ -1,3 +1,11 @@
+import os, sys
+
+# This try-catch is a workaround for Python3 when used with ROS; it is not needed for most platforms
+try:
+    sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+except:
+    pass
+
 import cv2
 import numpy as np
 
@@ -29,7 +37,8 @@ def detect_arrow(frame):
     # Shi-Tomasi Corner Detection
     feature_params = dict(maxCorners=20,
                             qualityLevel=0.01,
-                            minDistance=5)
+                            minDistance=7,
+                            blockSize=7)
     corners = cv2.goodFeaturesToTrack(blur_img, mask=None, **feature_params)
     
     if corners is not None and len(corners) > 5:
@@ -47,29 +56,34 @@ def detect_arrow(frame):
         # Fit an ellipse to the corners detected
         ellipse_center, (MA, ma), angle = cv2.fitEllipse(corners)
         cv2.circle(image, (int(ellipse_center[0]), int(ellipse_center[1])), 2, (0, 255, 0), -1)
-        
+
+        M1 = cv2.moments(corners)
+        moment_center_1 = (int(M1["m10"]/M1["m00"]), int(M1["m01"]/M1["m00"]))
+        # print('-->',moment_center_1)
+
         # Check if the object detected fits an ellipse (arrow) by a threshold
         if ma/MA > 1.25:
         
             # Find the momentum to detect the arrow head orientation
             M = cv2.moments(blur_img, True)
             moment_center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
+            # print(moment_center)
             cv2.circle(image, (int(moment_center[0]), int(moment_center[1])), 2, (0, 0, 255), -1)
             
-            x_diff = abs(ellipse_center[0] - moment_center[0])
-            y_diff = abs(ellipse_center[1] - moment_center[1])
+            x_diff = int(abs(ellipse_center[0] - moment_center[0]))
+            y_diff = int(abs(ellipse_center[1] - moment_center[1]))
             
-            if x_diff > y_diff:
-                if moment_center[0] > ellipse_center[0]:
+            if x_diff >= y_diff and moment_center[0] > moment_center[1]:
+                if moment_center[0] > ellipse_center[0] and moment_center_1[0] > moment_center[0]:
                     orientation = 'East'
-                else:
+                elif moment_center[0] < ellipse_center[0] and moment_center_1[0] < moment_center[0]:
                     orientation = 'West'
-            else:
-                if moment_center[1] > ellipse_center[1]:
+            elif x_diff <= y_diff and moment_center[0] < moment_center[1]:
+                if moment_center[1] > ellipse_center[1] and moment_center_1[1] > moment_center[1]:
                     orientation = 'South'
-                else:
+                elif moment_center[1] < ellipse_center[1] and moment_center_1[1] < moment_center[1]:
                     orientation = 'North'
-
+      
         #################################################################
         # NOTE: Following method is slightly flawed and deprecated
         # Find orientation based on where most points fall 

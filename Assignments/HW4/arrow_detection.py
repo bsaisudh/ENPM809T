@@ -19,7 +19,6 @@ def detect_arrow_1(frame):
     # Thresolding HSV range to get only green mask
     mask_green = cv2.inRange(hsv, lower_green, upper_green)
     masked_image =  cv2.bitwise_and(image, image, mask=mask_green)
-    mask_hsv_comparision = np.hstack((image, hsv, masked_image))
 
     # Apply Gaussian Blur to remove noise
     blur_img = cv2.GaussianBlur(mask_green, (11,11), 1)
@@ -28,6 +27,8 @@ def detect_arrow_1(frame):
     # Morphological Operation - Opening
     blur_img = cv2.erode(blur_img, None, iterations=3)
     blur_img = cv2.dilate(blur_img, None, iterations=3)
+
+    mask_hsv_comparision = np.hstack((image, hsv, blur_img))
 
     # Shi-Tomasi Corner Detection
     corners = cv2.goodFeaturesToTrack(blur_img, 100, 0.1, 5)

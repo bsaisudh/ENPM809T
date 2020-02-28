@@ -255,6 +255,62 @@ def detect_arrow_ls(frame):
         
     return image, orientation, mask_hsv_comparision, blur_img_comparision
 
+def detect_arrow_ellipse(frame):
+    """
+    Detect arrow orientation by fitting an ellipse and using its moments
+    """
+    image, blur_img, blur_img_comparision, mask_hsv_comparision = pre_process_image(frame)
+    orientation = ''
+
+    # Shi-Tomasi Corner Detection
+    feature_params = dict(maxCorners=7,
+                            qualityLevel=0.01,
+                            minDistance=10,
+                            blockSize=10)
+    
+    corners = cv2.goodFeaturesToTrack(blur_img, mask=None, **feature_params)
+    
+    if corners is not None and len(corners) > 5:
+        # Fit an ellipse to the corners detected
+        ellipse_center, (MA, ma), angle = cv2.fitEllipse(corners)
+       
+        cv2.circle(image, (int(ellipse_center[0]), int(ellipse_center[1])), 2, (255, 0, 0), -1)
+        image = cv2.ellipse(image,
+                            (int(ellipse_center[0]), int(ellipse_center[1])),
+                            (int(MA), int(ma)),
+                            angle, 0, 360, (255, 255, 0), 3)
+        # Check if the object detected fits an ellipse (arrow) by a threshold
+        if ma/MA > 1.25:
+        
+            # Find the momentum to detect the arrow head orientation
+            M = cv2.moments(blur_img, True)
+            moment_center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
+            # print(moment_center)
+            cv2.circle(image, (int(moment_center[0]), int(moment_center[1])), 2, (0, 0, 255), -1)
+            rows, cols = image.shape[0], image.shape[1]
+            M = cv2.getRotationMatrix2D(moment_center, angle-90, 1)
+            blur_img = cv2.warpAffine(blur_img, M, (cols, rows))
+            M = cv2.moments(blur_img, True)
+            moment_center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
+            corners = cv2.goodFeaturesToTrack(blur_img, mask=None, **feature_params)
+            corners = np.asarray(corners)
+            corners = np.squeeze(corners, axis = 1)
+            y_max_ndx = np.argmax(corners[:,1])
+            y_min_ndx = np.argmin(corners[:,1])
+            if 45 < angle < 135:
+                if corners[y_max_ndx,0] > moment_center[0]:
+                    orientation = 'west'
+                else:
+                    orientation = 'east'
+            else:
+                if corners[y_max_ndx,0] > moment_center[0]:
+                    orientation = 'north'
+                else:
+                    orientation = 'south'
+      
+    return image, orientation, mask_hsv_comparision, blur_img_comparision
+
+
 
 if __name__ == '__main__':
     
@@ -266,7 +322,7 @@ if __name__ == '__main__':
     for path in test_images:
         img = cv2.imread(path)
         
-        arrow_img, orientation, mask, blur = detect_arrow_ls(img)
+        arrow_img, orientation, mask, blur = detect_arrow_ellipse(img)
     
         cv2.putText(arrow_img, orientation, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), lineType=cv2.LINE_AA)
         cv2.imshow("Arrow Detected", arrow_img)

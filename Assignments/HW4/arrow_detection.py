@@ -21,13 +21,13 @@ def detect_arrow_1(frame):
     masked_img =  cv2.bitwise_and(image, image, mask=mask_green)
 
     # Apply Gaussian Blur to remove noise
-    blur_img = cv2.GaussianBlur(masked_img, (11,11), 1)
+    blur_img = cv2.GaussianBlur(mask_green, (11,11), 1)
 
     # Morphological Operation - Opening
     morph_img = cv2.erode(blur_img, None, iterations=3)
     morph_img = cv2.dilate(morph_img, None, iterations=3)
 
-    blur_img_comparision = np.hstack((masked_img, blur_img))
+    blur_img_comparision = np.hstack((mask_green, blur_img))
     mask_hsv_comparision = np.hstack((image, hsv, blur_img))
     morph_img_comparision = np.hstack((blur_img, morph_img))
 

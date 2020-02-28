@@ -28,7 +28,7 @@ def detect_arrow_1(frame):
     morph_img = cv2.dilate(morph_img, None, iterations=3)
 
     blur_img_comparision = np.hstack((mask_green, blur_img))
-    mask_hsv_comparision = np.hstack((image, hsv, blur_img))
+    mask_hsv_comparision = np.hstack((image, hsv, masked_img))
     morph_img_comparision = np.hstack((blur_img, morph_img))
 
     # Shi-Tomasi Corner Detection

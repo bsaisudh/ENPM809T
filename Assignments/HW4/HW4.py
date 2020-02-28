@@ -41,10 +41,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     key = cv2.waitKey(1) & 0xFF
     
     # arrow detection
-    arrow_img, orientation, mask, blur = detect_arrow_1(image)
+    arrow_img, orientation, mask, blur, morph = detect_arrow_1(image)
     
     cv2.imshow('Mask', mask)
     cv2.imshow('Blur', blur)
+    cv2.imshow('Morph', morph)
     
     cv2.putText(arrow_img, orientation, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
     cv2.imshow("Arrow Detected", arrow_img)

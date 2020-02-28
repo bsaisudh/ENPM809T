@@ -18,20 +18,21 @@ def detect_arrow_1(frame):
 
     # Thresolding HSV range to get only green mask
     mask_green = cv2.inRange(hsv, lower_green, upper_green)
-    masked_image =  cv2.bitwise_and(image, image, mask=mask_green)
+    masked_img =  cv2.bitwise_and(image, image, mask=mask_green)
 
     # Apply Gaussian Blur to remove noise
-    blur_img = cv2.GaussianBlur(mask_green, (11,11), 1)
-    blur_img_comparision = np.hstack((mask_green, blur_img))
+    blur_img = cv2.GaussianBlur(masked_img, (11,11), 1)
 
     # Morphological Operation - Opening
-    blur_img = cv2.erode(blur_img, None, iterations=3)
-    blur_img = cv2.dilate(blur_img, None, iterations=3)
+    morph_img = cv2.erode(blur_img, None, iterations=3)
+    morph_img = cv2.dilate(morph_img, None, iterations=3)
 
+    blur_img_comparision = np.hstack((masked_img, blur_img))
     mask_hsv_comparision = np.hstack((image, hsv, blur_img))
+    morph_img_comparision = np.hstack((blur_img, morph_img))
 
     # Shi-Tomasi Corner Detection
-    corners = cv2.goodFeaturesToTrack(blur_img, 100, 0.1, 5)
+    corners = cv2.goodFeaturesToTrack(morph_img, 100, 0.1, 5)
     
     if corners is not None and len(corners) > 0:
         corners = np.int0(corners)
@@ -82,7 +83,7 @@ def detect_arrow_1(frame):
             else:
                 orientation = 'South'
         
-    return image, orientation, mask_hsv_comparision, blur_img_comparision
+    return image, orientation, mask_hsv_comparision, blur_img_comparision, morph_img_comparision
 
 
 if __name__ == '__main__':

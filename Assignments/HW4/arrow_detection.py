@@ -200,8 +200,9 @@ def detect_arrow_ls(frame):
                             blockSize=2)
     
     corners = cv2.goodFeaturesToTrack(blur_img, mask=None, **feature_params)
-    print(len(corners))
+
     if corners is not None and len(corners) > 7:
+        print(len(corners))
         corners = np.asarray(corners)
         corners = np.squeeze(corners, axis = 1)
         plt.scatter(corners[:,0], corners[:,1])

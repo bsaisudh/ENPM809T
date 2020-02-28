@@ -52,7 +52,7 @@ def detect_arrow(frame):
         if ma/MA > 1.25:
         
             # Find the momentum to detect the arrow head orientation
-            M = cv2.moments(corners)
+            M = cv2.moments(blur_img, True)
             moment_center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
             cv2.circle(image, (int(moment_center[0]), int(moment_center[1])), 2, (0, 0, 255), -1)
             

@@ -38,7 +38,7 @@ def detect_arrow_1(frame):
             x,y = corner.ravel()
             points_x.append(x)
             points_y.append(y)
-            cv2.circle(image, (x,y), 3, (255, 0, 0), -1)
+            cv2.circle(image, (x,y), 1, (255, 0, 0), -1)
         
         arrow_mid_x = int((max(points_x) + min(points_x))/2)
         arrow_dist_x = max(points_x) - min(points_x)

@@ -27,10 +27,9 @@ def detect_arrow(frame):
     mask_hsv_comparision = np.hstack((image, hsv, masked_img))
 
     # Shi-Tomasi Corner Detection
-    feature_params = dict(maxCorners=25,
-                            qualityLevel=0.05,
-                            minDistance=5,
-                            blockSize=5)
+    feature_params = dict(maxCorners=20,
+                            qualityLevel=0.01,
+                            minDistance=5)
     corners = cv2.goodFeaturesToTrack(blur_img, mask=None, **feature_params)
     
     if corners is not None and len(corners) > 5:

@@ -35,7 +35,7 @@ def detect_arrow(frame):
     mask_hsv_comparision = np.hstack((image, hsv, masked_img))
 
     # Shi-Tomasi Corner Detection
-    feature_params = dict(maxCorners=10,
+    feature_params = dict(maxCorners=7,
                             qualityLevel=0.01,
                             minDistance=10,
                             blockSize=10)

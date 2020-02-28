@@ -74,14 +74,14 @@ def detect_arrow(frame):
             y_diff = int(abs(ellipse_center[1] - moment_center[1]))
             
             if x_diff >= y_diff and moment_center[0] > moment_center[1]:
-                if moment_center[0] > ellipse_center[0] and moment_center_1[0] > moment_center[0]:
+                if moment_center[0] > ellipse_center[0]:
                     orientation = 'East'
-                elif moment_center[0] < ellipse_center[0] and moment_center_1[0] < moment_center[0]:
+                elif moment_center[0] < ellipse_center[0]:
                     orientation = 'West'
             elif x_diff <= y_diff and moment_center[0] < moment_center[1]:
-                if moment_center[1] > ellipse_center[1] and moment_center_1[1] > moment_center[1]:
+                if moment_center[1] > ellipse_center[1]:
                     orientation = 'South'
-                elif moment_center[1] < ellipse_center[1] and moment_center_1[1] < moment_center[1]:
+                elif moment_center[1] < ellipse_center[1]:
                     orientation = 'North'
       
         #################################################################

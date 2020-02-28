@@ -25,8 +25,8 @@ def detect_arrow_1(frame):
 
     # Morphological Operation - Opening
     kernel = np.ones((5,5), np.uint8)
-    morph_img = cv2.erode(blur_img, kernel, iterations=1)
-    morph_img = cv2.dilate(morph_img, kernel, iterations=1)
+    morph_img = cv2.erode(blur_img, kernel, iterations=2)
+    morph_img = cv2.dilate(morph_img, kernel, iterations=2)
 
     blur_img_comparision = np.hstack((mask_green, blur_img))
     mask_hsv_comparision = np.hstack((image, hsv, masked_img))

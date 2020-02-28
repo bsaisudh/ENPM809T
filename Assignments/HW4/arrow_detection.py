@@ -46,7 +46,7 @@ def detect_arrow(frame):
             
         # Fit an ellipse to the corners detected
         ellipse_center, (MA, ma), angle = cv2.fitEllipse(corners)
-        cv2.circle(image, (ellipse_center[0], ellipse_center[1]), 2, (0, 255, 0), -1)
+        cv2.circle(image, (int(ellipse_center[0]), int(ellipse_center[1])), 2, (0, 255, 0), -1)
         
         # Check if the object detected fits an ellipse (arrow) by a threshold
         if ma/MA > 1.25:
@@ -54,7 +54,7 @@ def detect_arrow(frame):
             # Find the momentum to detect the arrow head orientation
             M = cv2.moments(corners)
             moment_center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
-            cv2.circle(image, (moment_center[0], moment_center[1]), 2, (0, 0, 255), -1)
+            cv2.circle(image, (int(moment_center[0]), int(moment_center[1])), 2, (0, 0, 255), -1)
             
             x_diff = abs(ellipse_center[0] - moment_center[0])
             y_diff = abs(ellipse_center[1] - moment_center[1])

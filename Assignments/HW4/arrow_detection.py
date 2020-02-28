@@ -8,6 +8,7 @@ except:
 
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 
@@ -30,7 +31,7 @@ def pre_process_image(frame):
     masked_img =  cv2.bitwise_and(image, image, mask=mask_green)
 
     # Apply Gaussian Blur to remove noise
-    blur_img = cv2.GaussianBlur(mask_green, (5,5), 1)
+    blur_img = cv2.GaussianBlur(mask_green, (3,3), 1)
 
     blur_img_comparision = np.hstack((mask_green, blur_img))
     mask_hsv_comparision = np.hstack((image, hsv, masked_img))
@@ -185,11 +186,73 @@ def detect_arrow_hough_lines(frame):
     return image, orientation, mask_hsv_comparision, blur_img_comparision
 
 
-def detect_arrow(frame):
+def detect_arrow_ls(frame):
     """
-    Default function
+    Detecting arrow orientation using mid point and euclidean distance
     """
-    return detect_arrow_euclidean(frame)
+    image, blur_img, blur_img_comparision, mask_hsv_comparision = pre_process_image(frame)
+    orientation = ''
+
+    # Shi-Tomasi Corner Detection
+    feature_params = dict(maxCorners=500,
+                            qualityLevel=0.01,
+                            minDistance=2,
+                            blockSize=2)
+    
+    corners = cv2.goodFeaturesToTrack(blur_img, mask=None, **feature_params)
+    print(len(corners))
+    if corners is not None and len(corners) > 7:
+        corners = np.asarray(corners)
+        corners = np.squeeze(corners, axis = 1)
+        plt.scatter(corners[:,0], corners[:,1])
+        plt.show()
+        for pt in corners:
+            cv2.circle(image, (pt[0],pt[1]), 1, (255, 0, 0), -1)
+        A = np.vstack((np.ones(corners.shape[0]),corners[:,1]))
+        B = corners[:,0]
+        m, c = np.linalg.lstsq(A.T,B.T)[0]
+        print(f"m: {m*180/3.14} :: c : {c}")
+        # points_x = np.asarray(points_x)
+        # points_y = np.asarray(points_y)
+        
+        # arrow_mid_x = int((np.max(points_x) + np.min(points_x))/2)
+        # arrow_dist_x = np.max(points_x) - np.min(points_x)
+        
+        # arrow_mid_y = int((np.max(points_y) + np.min(points_y))/2)
+        # arrow_dist_y = np.max(points_y) - np.min(points_y)
+        
+        # if arrow_dist_x > arrow_dist_y:
+        #     west_corners = 0
+        #     east_corners = 0
+            
+        #     for corner in corners:
+        #         x, y = corner.ravel()
+        #         if x < int(arrow_mid_x):
+        #             west_corners += 1
+        #         else:
+        #             east_corners += 1
+
+        #     if west_corners > east_corners:
+        #         orientation = 'West'
+        #     else:
+        #         orientation = 'East'
+        # else:
+        #     north_corners = 0
+        #     south_corners = 0
+            
+        #     for corner in corners:
+        #         x, y = corner.ravel()
+        #         if y < int(arrow_mid_y):
+        #             north_corners += 1
+        #         else:
+        #             south_corners += 1
+
+        #     if north_corners > south_corners:
+        #         orientation = 'North'
+        #     else:
+        #         orientation = 'South'
+        
+    return image, orientation, mask_hsv_comparision, blur_img_comparision
 
 
 if __name__ == '__main__':
@@ -202,7 +265,7 @@ if __name__ == '__main__':
     for path in test_images:
         img = cv2.imread(path)
         
-        arrow_img, orientation, mask, blur = detect_arrow(img)
+        arrow_img, orientation, mask, blur = detect_arrow_ls(img)
     
         cv2.putText(arrow_img, orientation, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), lineType=cv2.LINE_AA)
         cv2.imshow("Arrow Detected", arrow_img)

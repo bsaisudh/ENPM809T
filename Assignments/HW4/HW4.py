@@ -46,7 +46,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     cv2.imshow('Mask', mask)
     cv2.imshow('Blur', blur)
     
-    cv2.putText(arrow_img, orientation, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), lineType=cv2.LINE_AA)
+    cv2.putText(arrow_img, orientation, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
     cv2.imshow("Arrow Detected", arrow_img)
     
     # write frame to video file

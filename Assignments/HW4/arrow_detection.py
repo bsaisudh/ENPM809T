@@ -66,15 +66,15 @@ def detect_arrow(frame):
             # print(moment_center)
             cv2.circle(image, (int(moment_center[0]), int(moment_center[1])), 2, (0, 0, 255), -1)
             
-            x_diff = abs(ellipse_center[0] - moment_center[0])
-            y_diff = abs(ellipse_center[1] - moment_center[1])
+            x_diff = int(abs(ellipse_center[0] - moment_center[0]))
+            y_diff = int(abs(ellipse_center[1] - moment_center[1]))
             
             if x_diff > y_diff and moment_center[0] > moment_center[1]:
                 if moment_center[0] > ellipse_center[0]:
                     orientation = 'East'
                 elif moment_center[0] < ellipse_center[0]:
                     orientation = 'West'
-            else:
+            elif x_diff > y_diff and moment_center[0] < moment_center[1]:
                 if moment_center[1] > ellipse_center[1]:
                     orientation = 'South'
                 elif moment_center[1] < ellipse_center[1]:

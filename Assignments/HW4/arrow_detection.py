@@ -10,12 +10,13 @@ import cv2
 import numpy as np
 
 
-def detect_arrow(frame):
+
+def pre_process_image(frame):
     """
-    Arrow detection using Corners and further detects its orientation
+    Mask the image for the green arrow using HSV thresholding and
+    Gaussian Blur for removing noise
     """
     image = frame.copy()
-    orientation = ''
     
     # Covert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -34,11 +35,22 @@ def detect_arrow(frame):
     blur_img_comparision = np.hstack((mask_green, blur_img))
     mask_hsv_comparision = np.hstack((image, hsv, masked_img))
 
+    return image, blur_img, blur_img_comparision, mask_hsv_comparision 
+
+
+def detect_arrow_euclidean(frame):
+    """
+    Detecting arrow orientation using mid point and euclidean distance
+    """
+    image, blur_img, blur_img_comparision, mask_hsv_comparision = pre_process_image(frame)
+    orientation = ''
+
     # Shi-Tomasi Corner Detection
     feature_params = dict(maxCorners=7,
                             qualityLevel=0.01,
                             minDistance=10,
                             blockSize=10)
+    
     corners = cv2.goodFeaturesToTrack(blur_img, mask=None, **feature_params)
     
     if corners is not None and len(corners) > 5:
@@ -52,7 +64,77 @@ def detect_arrow(frame):
             points_x.append(x)
             points_y.append(y)
             cv2.circle(image, (x,y), 1, (255, 0, 0), -1)
+                    
+        points_x = np.asarray(points_x)
+        points_y = np.asarray(points_y)
+        
+        arrow_mid_x = int((np.max(points_x) + np.min(points_x))/2)
+        arrow_dist_x = np.max(points_x) - np.min(points_x)
+        
+        arrow_mid_y = int((np.max(points_y) + np.min(points_y))/2)
+        arrow_dist_y = np.max(points_y) - np.min(points_y)
+        
+        if arrow_dist_x > arrow_dist_y:
+            west_corners = 0
+            east_corners = 0
             
+            for corner in corners:
+                x, y = corner.ravel()
+                if x < int(arrow_mid_x):
+                    west_corners += 1
+                else:
+                    east_corners += 1
+
+            if west_corners > east_corners:
+                orientation = 'West'
+            else:
+                orientation = 'East'
+        else:
+            north_corners = 0
+            south_corners = 0
+            
+            for corner in corners:
+                x, y = corner.ravel()
+                if y < int(arrow_mid_y):
+                    north_corners += 1
+                else:
+                    south_corners += 1
+
+            if north_corners > south_corners:
+                orientation = 'North'
+            else:
+                orientation = 'South'
+        
+    return image, orientation, mask_hsv_comparision, blur_img_comparision
+
+
+def detect_arrow_moments(frame):
+    """
+    Detect arrow orientation by fitting an ellipse and using its moments
+    """
+    image, blur_img, blur_img_comparision, mask_hsv_comparision = pre_process_image(frame)
+    orientation = ''
+
+    # Shi-Tomasi Corner Detection
+    feature_params = dict(maxCorners=7,
+                            qualityLevel=0.01,
+                            minDistance=10,
+                            blockSize=10)
+    
+    corners = cv2.goodFeaturesToTrack(blur_img, mask=None, **feature_params)
+    
+    if corners is not None and len(corners) > 5:
+        corners = np.int0(corners)
+        
+        points_x = []
+        points_y = []
+        
+        for corner in corners:
+            x,y = corner.ravel()
+            points_x.append(x)
+            points_y.append(y)
+            cv2.circle(image, (x,y), 1, (255, 0, 0), -1)
+        
         # Fit an ellipse to the corners detected
         ellipse_center, (MA, ma), angle = cv2.fitEllipse(corners)
         cv2.circle(image, (int(ellipse_center[0]), int(ellipse_center[1])), 2, (255, 0, 0), -1)
@@ -80,53 +162,34 @@ def detect_arrow(frame):
                 elif moment_center[1] < ellipse_center[1]:
                     orientation = 'North'
       
-        #################################################################
-        # NOTE: Following method is slightly flawed and deprecated
-        # Find orientation based on where most points fall 
-        # away from the center
-        #################################################################
-                
-        # points_x = np.asarray(points_x)
-        # points_y = np.asarray(points_y)
-        
-        # arrow_mid_x = int((np.max(points_x) + np.min(points_x))/2)
-        # arrow_dist_x = np.max(points_x) - np.min(points_x)
-        
-        # arrow_mid_y = int((np.max(points_y) + np.min(points_y))/2)
-        # arrow_dist_y = np.max(points_y) - np.min(points_y)
-        
-        # if arrow_dist_x > arrow_dist_y:
-        #     west_corners = 0
-        #     east_corners = 0
-            
-        #     for corner in corners:
-        #         x, y = corner.ravel()
-        #         if x < int(arrow_mid_x):
-        #             west_corners += 1
-        #         else:
-        #             east_corners += 1
+    return image, orientation, mask_hsv_comparision, blur_img_comparision
 
-        #     if west_corners > east_corners:
-        #         orientation = 'West'
-        #     else:
-        #         orientation = 'East'
-        # else:
-        #     north_corners = 0
-        #     south_corners = 0
-            
-        #     for corner in corners:
-        #         x, y = corner.ravel()
-        #         if y < int(arrow_mid_y):
-        #             north_corners += 1
-        #         else:
-        #             south_corners += 1
 
-        #     if north_corners > south_corners:
-        #         orientation = 'North'
-        #     else:
-        #         orientation = 'South'
+def detect_arrow_hough_lines(frame):
+    """
+    Detect arrow orientation by using hough lines and the angles formed
+    """
+    image, blur_img, blur_img_comparision, mask_hsv_comparision = pre_process_image(frame)
+    orientation = ''
+
+    # Canny edge detection
+    edges = cv2.Canny(blur_img,50,150,apertureSize = 3)
+
+    # Hough Lines Transform
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 20)
+
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0), 2)
         
     return image, orientation, mask_hsv_comparision, blur_img_comparision
+
+
+def detect_arrow(frame):
+    """
+    Default function
+    """
+    return detect_arrow_euclidean(frame)
 
 
 if __name__ == '__main__':

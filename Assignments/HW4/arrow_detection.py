@@ -55,10 +55,10 @@ def detect_arrow(frame):
             
         # Fit an ellipse to the corners detected
         ellipse_center, (MA, ma), angle = cv2.fitEllipse(corners)
-        cv2.circle(image, (int(ellipse_center[0]), int(ellipse_center[1])), 2, (0, 255, 0), -1)
 
         M1 = cv2.moments(corners)
         moment_center_1 = (int(M1["m10"]/M1["m00"]), int(M1["m01"]/M1["m00"]))
+        cv2.circle(image, (int(moment_center_1[0]), int(moment_center_1[1])), 2, (255, 0, 0), -1)
         # print('-->',moment_center_1)
 
         # Check if the object detected fits an ellipse (arrow) by a threshold

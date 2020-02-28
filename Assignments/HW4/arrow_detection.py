@@ -38,16 +38,44 @@ def detect_arrow(frame):
         
         points_x = []
         points_y = []
-        points = []
         
         for corner in corners:
-             x,y = corner.ravel()
-             points_x.append(x)
-             points_y.append(y)
-             points.append(np.array(x,y))
-             cv2.circle(image, (x,y), 1, (255, 0, 0), -1)
-	cv2.ellipse(image,points,(0,0,255),2)
-        points_x = np.asarray(points_x)
+            x,y = corner.ravel()
+            points_x.append(x)
+            points_y.append(y)
+            cv2.circle(image, (x,y), 1, (255, 0, 0), -1)
+            
+        # Fit an ellipse to the corners detected
+        ellipse_center, (MA, ma), angle = cv2.fitEllipse(corners)
+        
+        # Check if the object detected fits an ellipse (arrow) by a threshold
+        if ma/MA > 1.5:
+        
+            # Find the momentum to detect the arrow head orientation
+            M = cv2.moments(corners)
+            moment_center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
+            
+            x_diff = abs(ellipse_center[0] - moment_center[0])
+            y_diff = abs(ellipse_center[1] - moment_center[1])
+            
+            if x_diff > y_diff:
+                if moment_center[0] > ellipse_center[0]:
+                    orientation = 'East'
+                else:
+                    orientation = 'West'
+            else:
+                if moment_center[1] > ellipse_center[1]:
+                    orientation = 'South'
+                else:
+                    orientation = 'North'
+
+        #################################################################
+        # NOTE: Following method is slightly flawed and deprecated
+        # Find orientation based on where most points fall 
+        # away from the center
+        #################################################################
+                
+        # points_x = np.asarray(points_x)
         # points_y = np.asarray(points_y)
         
         # arrow_mid_x = int((np.max(points_x) + np.min(points_x))/2)

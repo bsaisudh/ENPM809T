@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # custom imports
-from arrow_detection import detect_arrow
+from arrow_detection import *
 
 # initialize the Raspberry Pi camera
 camera = PiCamera()
@@ -41,7 +41,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     key = cv2.waitKey(1) & 0xFF
     
     # arrow detection
-    arrow_img, orientation, mask, blur = detect_arrow(image)
+    arrow_img, orientation, mask, blur = detect_arrow_ls(image)
     
     cv2.imshow('Mask', mask)
     cv2.imshow('Blur', blur)

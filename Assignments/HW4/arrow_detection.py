@@ -35,23 +35,19 @@ def detect_arrow(frame):
     
     if corners is not None and len(corners) > 0:
         corners = np.int0(corners)
-
-        ellipse = cv2.fitEllipse(corners)
-        axes = ellipse[1]
-        minor, major = axes
-
-        print(minor, major)
         
-        # points_x = []
-        # points_y = []
+        points_x = []
+        points_y = []
+        points = []
         
-        # for corner in corners:
-        #     x,y = corner.ravel()
-        #     points_x.append(x)
-        #     points_y.append(y)
-        #     cv2.circle(image, (x,y), 1, (255, 0, 0), -1)
-
-        # points_x = np.asarray(points_x)
+        for corner in corners:
+             x,y = corner.ravel()
+             points_x.append(x)
+             points_y.append(y)
+             points.append(np.array(x,y))
+             cv2.circle(image, (x,y), 1, (255, 0, 0), -1)
+	cv2.ellipse(image,points,(0,0,255),2)
+        points_x = np.asarray(points_x)
         # points_y = np.asarray(points_y)
         
         # arrow_mid_x = int((np.max(points_x) + np.min(points_x))/2)
@@ -104,7 +100,7 @@ if __name__ == '__main__':
     for path in test_images:
         img = cv2.imread(path)
         
-        arrow_img, orientation, mask, blur = detect_arrow_1(img)
+        arrow_img, orientation, mask, blur = detect_arrow(img)
     
         cv2.putText(arrow_img, orientation, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), lineType=cv2.LINE_AA)
         cv2.imshow("Arrow Detected", arrow_img)

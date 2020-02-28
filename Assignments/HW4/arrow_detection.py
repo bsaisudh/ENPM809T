@@ -33,7 +33,7 @@ def detect_arrow_1(frame):
     morph_img_comparision = np.hstack((blur_img, morph_img))
 
     # Shi-Tomasi Corner Detection
-    corners = cv2.goodFeaturesToTrack(morph_img, 100, 0.1, 5)
+    corners = cv2.goodFeaturesToTrack(morph_img, 20, 0.01, 10)
     
     if corners is not None and len(corners) > 0:
         corners = np.int0(corners)

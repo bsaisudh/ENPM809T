@@ -22,9 +22,9 @@ def forward(tf):
     init()
     # Left wheels
     gpio.output(31, True)
-    gpio.output(33, True)
+    gpio.output(33, False)
     # Right wheels
-    gpio.output(35, True)
+    gpio.output(35, False)
     gpio.output(37, True)
     # Wait
     time.sleep(tf)

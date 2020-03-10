@@ -48,7 +48,7 @@ def reverse(tf):
     gpio.cleanup()
 
 
-def pivotleft(tf):
+def pivotright(tf):
     init()
     # Left wheels
     gpio.output(31, True)
@@ -63,7 +63,7 @@ def pivotleft(tf):
     gpio.cleanup()
 
 
-def pivotright(tf):
+def pivotleft(tf):
     init()
     # Left wheels
     gpio.output(31, False)

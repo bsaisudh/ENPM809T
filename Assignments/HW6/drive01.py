@@ -37,11 +37,16 @@ servo = servo_class()
 motor = motor_driver(0.5)
 sonar = sonar_class()
 
+key_press = None
+
 while True:
     command = "None"
     dc = "None"
     distance = 0
-    key_press = input("Select driving mode: ")
+    if key_press == None:
+        key_press = input("Select driving mode: ")
+    else:
+        print(f"Pressed Key: {key_press} ")            
     if key_press == 'q':
         break
     if key_press == "w" or \
@@ -63,10 +68,12 @@ while True:
     image = camera.capture()
     image = overlay(image, command, dc, distance)
     cv2.imshow("Frame", image)
-    key = cv2.waitKey(1) & 0xFF
+    key = cv2.waitKey(0) & 0xFF
     camera.video_write(image)
     if key == ord("q"):
         break
+    else:
+        key_press = chr(key)
     
     
 camera.cleanup()

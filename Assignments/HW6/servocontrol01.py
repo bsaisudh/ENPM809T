@@ -26,8 +26,6 @@ def setduty(i, cam, s):
     cv2.imshow("Frame", image)
     cam.video_write(image)
     key = cv2.waitKey(1) & 0xFF
-    if key == ord("q"):
-        break
 
 for i in range(10, 20):
     setduty(i, cam, s)    

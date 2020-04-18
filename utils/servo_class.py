@@ -1,7 +1,7 @@
 import RPi.GPIO as gpio
 import time
 
-class Servo:
+class servo_class:
     def __init__(self):
         self.init_servo()
         self.pwm = None

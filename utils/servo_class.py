@@ -25,7 +25,7 @@ class servo_class:
         if (not(check) or (dc >= 5 and dc <= 10)):
             self.pwm.ChangeDutyCycle(dc)
         else:
-            print("**ERROR** : duty cycle out of range [0,10]")
+            print("**ERROR** : duty cycle out of range [5,10]")
         
     def release_load(self):
         self.set_dutycycle(0, check = False)

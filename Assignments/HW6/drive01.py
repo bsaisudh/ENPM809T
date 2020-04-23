@@ -34,7 +34,7 @@ def overlay(image, cmd, dc, dist):
 
 camera = RasPiCamera()
 servo = servo_class()
-motor = motor_driver(0.5)
+motor = motor_driver()
 sonar = sonar_class()
 
 key_press = None
@@ -54,7 +54,7 @@ while True:
        key_press == "s" or \
        key_press == "d":
         command = "motor operation: " + key_press
-        motor.key_input(key_press)
+        motor.key_input(key_press, 0.5)
     if key_press == "p":
         command = "servo control"
         dc = float(input("Duty Cycle: "))

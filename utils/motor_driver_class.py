@@ -2,16 +2,15 @@ import RPi.GPIO as gpio
 import time
 
 class motor_driver:
-    def __init__(self, tf = 1):
+    def __init__(self):
         self.init()
-        self.exec_time = tf # in seconds
     
     def init(self):
         gpio.setmode(gpio.BOARD)
         gpio.setup(31, gpio.OUT) #IN1
-        gpio.setup(33, gpio.OUT) #IN1
-        gpio.setup(35, gpio.OUT) #IN1
-        gpio.setup(37, gpio.OUT) #IN1
+        gpio.setup(33, gpio.OUT) #IN2
+        gpio.setup(35, gpio.OUT) #IN3
+        gpio.setup(37, gpio.OUT) #IN4
 
     def cleanup(self):
         gpio.cleanup()
@@ -24,19 +23,21 @@ class motor_driver:
         gpio.output(37, False)
 
 
-    def forward(self):
+    def forward(self, tf = 0):
         # Left wheels
         gpio.output(31, True)
         gpio.output(33, False)
         # Right wheels
         gpio.output(35, False)
         gpio.output(37, True)
+        
         # Wait
-        time.sleep(self.exec_time)
-        # Set all pins low and cleanup
-        self.gameover()
+        if tf > 0 :
+            time.sleep(tf)
+            # Set all pins low and cleanup
+            self.gameover()
 
-    def reverse(self):
+    def reverse(self, tf = 0):
         # Left wheels
         gpio.output(31, False)
         gpio.output(33, True)
@@ -44,12 +45,13 @@ class motor_driver:
         gpio.output(35, True)
         gpio.output(37, False)
         # Wait
-        time.sleep(self.exec_time)
-        # Set all pins low and cleanup
-        self.gameover()
+        if tf > 0:
+            time.sleep(tf)
+            # Set all pins low and cleanup
+            self.gameover()
 
 
-    def pivotright(self):
+    def pivotright(self, tf = 0):
         # Left wheels
         gpio.output(31, True)
         gpio.output(33, False)
@@ -57,11 +59,12 @@ class motor_driver:
         gpio.output(35, True)
         gpio.output(37, False)
         # Wait
-        time.sleep(self.exec_time)
-        # Set all pins low and cleanup
-        self.gameover()
+        if tf > 0:
+            time.sleep(tf)
+            # Set all pins low and cleanup
+            self.gameover()
 
-    def pivotleft(self):
+    def pivotleft(self, tf = 0):
         # Left wheels
         gpio.output(31, False)
         gpio.output(33, True)
@@ -69,31 +72,31 @@ class motor_driver:
         gpio.output(35, False)
         gpio.output(37, True)
         # Wait
-        time.sleep(self.exec_time)
-        # Set all pins low and cleanup
-        self.gameover()
+        if tf > 0:
+            time.sleep(tf)
+            # Set all pins low and cleanup
+            self.gameover()
 
-    def key_input(self, event):
+    def key_input(self, event, tf = 0):
         print("Key: ", event)
         key_press = event
         
         if key_press.lower() == 'w':
-            self.forward()
+            self.forward(tf)
         elif key_press.lower() == 's':
-            self.reverse()
+            self.reverse(tf)
         elif key_press.lower() == 'a':
-            self.pivotleft()
+            self.pivotleft(tf)
         elif key_press.lower() == 'd':
-            self.pivotright()
+            self.pivotright(tf)
         else:
             print("Invalid key !")
 
 if __name__ == '__main__':
-    motor = motor_driver(1)
-    motor.exec_time = 1
+    motor = motor_driver()
     while True:
         key_press = input("Select driving mode: ")
         if key_press == 'q':
             break
-        motor.key_input(key_press)
+        motor.key_input(key_press, 1)
     motor.cleanup()

@@ -6,6 +6,8 @@ def init():
     gpio.setup(33, gpio.OUT) #IN1
     gpio.setup(35, gpio.OUT) #IN1
     gpio.setup(37, gpio.OUT) #IN1
+    
+    gpio.setup(12, gpio.IN, pull_up_down = gpio.PUD_UP)
 
 def motors_shut_down():
     # Set all pins LOW

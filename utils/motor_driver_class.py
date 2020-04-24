@@ -33,7 +33,8 @@ class motor_driver:
     
     def set_dutycycle(self, duty_cycles):
         for p, dc in zip(self.pwm, duty_cycles):
-            p.ChangeDutyCycle(dc)
+            if dc != None:
+                p.ChangeDutyCycle(dc)
             
     def pwm_gameover(self):
         self.set_dutycycle([0, 0, 0, 0])
@@ -41,14 +42,24 @@ class motor_driver:
     def pwm_drive(self, direc, dc, tf = 0):
         if direc == "forward":
             self.set_dutycycle([dc, 0, 0, dc])
-        if direc == "reverse":
+        elif direc == "reverse":
             self.set_dutycycle([0, dc, dc, 0])
-        if direc == "pivotright":
+        elif direc == "pivotright":
             self.set_dutycycle([dc, 0, dc, 0])
-        if direc == "pivotleft":
+        elif direc == "pivotleft":
             self.set_dutycycle([0, dc, 0, dc])
-        if direc == "stop":
+        elif direc == "rightforward":
+            self.set_dutycycle([0, 0, 0, dc])
+        elif direc == "rightreverse":
+            self.set_dutycycle([0, 0, dc, 0])
+        elif direc == "leftreverse":
+            self.set_dutycycle([0, dc, 0, 0])
+        elif direc == "leftforward":
+            self.set_dutycycle([dc, 0, 0, 0])
+        elif direc == "stop":
             self.pwm_gameover()
+        else:
+            print(f"Not a valid command : {direc}")
         if tf > 0:
             time.sleep(tf)
             self.pwm_gameover()

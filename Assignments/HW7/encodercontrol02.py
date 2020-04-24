@@ -1,6 +1,8 @@
 import RPi.GPIO as gpio
 import time
 import cv2
+import matplotlib.pyplot as plt
+import numpy as np
 
 import sys
 sys.path.append('../../utils')
@@ -14,9 +16,14 @@ motor = motor_driver()
 motor.init_pwm_mode()
 print("motors set to pwm opereation")
 
-motor.pwm_drive("pivotright", 14)
-encoder.count_till(20, encoder.read_right)
+motor.pwm_drive("leftforward", 14)
+data = None
+encoder.count_till(20, encoder.read_left, data)
 motor.pwm_gameover()
+
+# plt.plot(data)
+# plt.show()
+# np.savetxt("encoder_data.txt", data)
 
 motor.cleanup()
 encoder.cleanup()

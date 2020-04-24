@@ -32,7 +32,7 @@ class encoder_class:
                 button = reading
                 self.counter += 1
                 print(f"Counter Value : {self.counter}")
-            if self.counter > count:
+            if self.counter >= count:
                 print ("--- Thanks for playing the game ---")
                 break
     

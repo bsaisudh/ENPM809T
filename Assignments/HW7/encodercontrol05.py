@@ -24,7 +24,7 @@ print("encoder inititalized")
 motor.pwm_drive("forward", 14)
 dataR = None
 dataL = None
-encoder.countRL_till(20, 20, dataR, dataL)
+encoder.countRL_till(90, 90, dataR, dataL)
 motor.pwm_gameover()
 
 plt.figure()

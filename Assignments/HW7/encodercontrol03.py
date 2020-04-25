@@ -16,7 +16,7 @@ motor = motor_driver()
 motor.init_pwm_mode()
 print("motors set to pwm opereation")
 
-motor.pwm_drive("rightreverse", 14)
+motor.pwm_drive("rightforward", 14)
 dataR = []
 dataL = []
 encoder.countRL_till(20, 0, dataR, dataL)
@@ -25,16 +25,16 @@ motor.pwm_gameover()
 plt.figure()
 plt.subplot(211)
 plt.plot(dataR)
-plt.title("Right Encoder")
+plt.ylabel("Right Encoder")
 
 plt.subplot(212)
 plt.plot(dataL)
-plt.title("Left Encoder")
+plt.ylabel("Left Encoder")
 
 plt.show()
 
-# np.savetxt("encoder_data_right.txt", dataR)
-# np.savetxt("encoder_data_left.txt", dataL)
+np.savetxt("encoder_data_right.txt", dataR)
+np.savetxt("encoder_data_left.txt", dataL)
 
 motor.cleanup()
 encoder.cleanup()

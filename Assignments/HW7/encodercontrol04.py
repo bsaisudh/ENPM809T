@@ -24,17 +24,17 @@ print("encoder inititalized")
 motor.pwm_drive("forward", 14)
 dataR = []
 dataL = []
-encoder.countRL_till(20, 30, dataR, dataL)
+encoder.countRL_till(20, 20, dataR, dataL)
 motor.pwm_gameover()
 
 plt.figure()
 plt.subplot(211)
 plt.plot(dataR)
-plt.title("Right Encoder")
+plt.ylabel("Right Encoder")
 
 plt.subplot(212)
 plt.plot(dataL)
-plt.title("Left Encoder")
+plt.ylabel("Left Encoder")
 
 plt.show()
 

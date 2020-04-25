@@ -16,14 +16,15 @@ motor = motor_driver()
 motor.init_pwm_mode()
 print("motors set to pwm opereation")
 
-motor.pwm_drive("leftforward", 14)
-data = None
-encoder.count_till(20, encoder.read_left, data)
+motor.pwm_drive("rightforward", 14)
+data = []
+encoder.count_till(20, encoder.read_right, data)
 motor.pwm_gameover()
 
-# plt.plot(data)
-# plt.show()
-# np.savetxt("encoder_data.txt", data)
+plt.plot(data)
+plt.title("Encoder Reading")
+plt.show()
+np.savetxt("encoder_data.txt", data)
 
 motor.cleanup()
 encoder.cleanup()

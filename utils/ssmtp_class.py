@@ -9,7 +9,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
 # Time Stamps
-pic_time = datetime.now().strftime('%Y-%m-%d--%H:%M:%S')
+pic_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 fName = pic_time + ".jpg"
 command = "raspistill -w 640 -h 640 -vf -hf -o " + fName
 os.system(command)

@@ -39,7 +39,7 @@ class motor_driver:
     def pwm_gameover(self):
         self.set_dutycycle([0, 0, 0, 0])
         
-    def pwm_drive(self, direc, dc, tf = 0):
+    def pwm_drive(self, direc, dc = 14, tf = 0):
         if direc == "forward":
             self.set_dutycycle([dc, 0, 0, dc])
         elif direc == "reverse":

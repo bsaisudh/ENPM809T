@@ -53,9 +53,12 @@ class imu_thread:
     
     def stop_read(self):
         self.exit_event.set()
+        print('exit_event_set, waiting for join')
         self.imu_thread.join()
+        print('Thread Joined')
         self.imu_thread = None
-    
+        print('Thread stopped')
+        
     def get_orientation(self):
         return self.q.get()
 

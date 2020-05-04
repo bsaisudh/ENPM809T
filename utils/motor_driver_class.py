@@ -29,7 +29,6 @@ class motor_driver:
                 p.stop()
         self.gameover()
         gpio.cleanup()
-        
     
     def set_dutycycle(self, duty_cycles):
         for p, dc in zip(self.pwm, duty_cycles):

@@ -27,16 +27,19 @@ class imu_thread:
     
     @staticmethod  
     def read_imu(socket_s, que:Queue, exit_evnt:Event):
+        t = time.time()
         while 1:
             message, address = socket_s.recvfrom(8192)
             message = message.decode("utf-8")
             message = message.strip(" 'b ")
             message = message.split(',')
+            print(time.time() - t)
+            t = time.time()
             try:
                 ndx = message.index(' 81')
                 orientation = message[ndx+1:ndx+4]
                 orientation = [float(x) for x in orientation]
-                # print(orientation)
+                print(orientation)
                 que.put(orientation)
             except ValueError:
                 pass

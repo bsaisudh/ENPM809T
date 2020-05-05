@@ -14,14 +14,16 @@ imu = imu_thread()
 imu.start_read()
 print("IMU inititalized and started to read")
 
-init_angle = imu.get_orientation()
+init_angle = imu.get_orientation()[0]
+final_angle  = (init_angle + 90)/360
 
-motor.pwm_drive("pivotright", 50)
+motor.pwm_drive("pivotright", 80)
 while 1:
     angle = imu.get_orientation()
     print(f'init angle = {init_angle[0]} :: angle = {angle[0]}')
-    if(angle[0]-init_angle[0] > 90):
+    if(angle < final_angle+2 and angle > final_angle-2):
         break
+    time.sleep(0.1)
 motor.pwm_drive("stop")
 
 motor.cleanup()

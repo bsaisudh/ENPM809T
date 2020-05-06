@@ -24,20 +24,21 @@ class pid_controller:
         self.util = _util
         
         
-    def controller(self, dev, dt = 0.1):
+    def controller(self, dev):
         i_e = 0
         e = 0
         d_e = 0
         prev_e = 0
         control = 0
+        prev_time = time.time()
         while 1:
             e = self.util.error_fntn()
             i_e += e
-            d_e = (prev_e - e)*dt
+            d_e = (prev_e - e)*(time.time()-prev_time)
             prev_e = e
+            prev_time = time.time()
             control = self.kp*e + self.kd*d_e + self.ki*i_e
             self.util.exec_fntn(control)
-            time.sleep(dt)
             print(f'c : {control:.2f} - e : {e:.2f} - ie : {i_e:.2f} : de : {d_e:.2f} :: {self.kp*e:.2f} : {self.kd*d_e:.2f} : {self.ki*i_e:.2f}')
             if abs(e) < dev:
                 break

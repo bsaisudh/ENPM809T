@@ -16,17 +16,22 @@ print("motors set to pwm opereation")
 
 encoder = encoder_class()
 encoder.init_callback(motor.set_dutycycle,
-                      [[None, None, 0, 0]],
+                      [[0, 0, 0, 0]],
                       motor.set_dutycycle,
-                      [[0, 0, None, None]])
+                      [[None, None, None, None]])
 print("encoder inititalized")
 
-motor.pwm_drive("forward", 14)
-dataR = []
-dataL = []
-encoder.countRL_till(20, 20, dataR, dataL)
-motor.pwm_gameover()
+tics = int(input("enter number of tics: "))
+dc = int(input("enter pwm duty cycle: "))
 
+for i in range(4):
+    motor.pwm_drive("pivotright", dc)
+    dataR = []
+    dataL = []
+    encoder.countRL_till(tics, 0, dataR, dataL)
+    motor.pwm_gameover()
+    time.sleep(0.5)
+    
 plt.figure()
 plt.subplot(211)
 plt.plot(dataR)

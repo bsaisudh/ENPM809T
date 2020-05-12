@@ -7,10 +7,54 @@ import sys
 sys.path.append('../../utils')
 from video_recorder import RasPiCamera
 
-class process_block:
+global win_pts
+
+# Mouse Click Event
+# https://www.pyimagesearch.com/2015/03/09/capturing-mouse-click-events-with-python-and-opencv/
+
+def onmouse(event, x, y, flags, param):
+    global win_pts
+    if event == cv2.EVENT_LBUTTONUP:
+        if len(win_pts) < 2:
+            win_pts.append((x, y))
+        else:
+            win_pts.pop(0)
+            win_pts.append((x,y))
+
+class block_calibration:
     def __init__(self):
         self.f = None
-    
+        self.w = None
+        self.h = None
+        
+    def get_f(self, camera:RasPiCamera):
+        global win_pts
+        win_pts = []
+        win_name = 'calibration_block'
+        img = camera.capture()
+        cv2.imshow(win_name, img)
+        cv2.setMouseCallback(win_name, onmouse)
+        while 1:
+            cv2.imshow(win_name, img)
+            k = cv2.waitKey(1) & 0xFF
+            if k == 27 or ord('q'): # esc key
+                break
+            if k == ord('n'):
+                img = camera.capture()
+                win_pts = []
+            for pt in win_pts:
+                cv2.circle(img, pt, 4, (255, 255, 0), -1)
+        cv2.destroyWindow(win_name)
+
+class process_block:
+    def __init__(self, color = "red"):
+        
+        if color == 'red':
+            self.low = [0, 70, 50]
+            self.high = [180, 255, 255]
+            self.hsv_low = [170, 70, 50]
+            self.hsv_high = [10, 255, 255]
+        
     def threshold_hsv_red(self, frame):
         """
         HSV Thresolding of the Red color in given frame
@@ -70,11 +114,4 @@ class process_block:
     
     def display(self):
         cv2.imshow("mask_hsv_comparison", self.mask_hsv_comparision)
-
-
-if __name__ == "__main__" :
-    camera = RasPiCamera()
-    block = process_block()
-    img = camera.capture()
-    camera.cleanup()
     

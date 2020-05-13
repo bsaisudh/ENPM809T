@@ -9,6 +9,9 @@ camera = RasPiCamera()
 block = process_block()
 img = camera.capture()
 
+focal_length = 514.2857142857143
+obj_hieght = 7
+
 calib = block_calibration()
 calib.get_f(camera)
 

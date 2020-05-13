@@ -103,7 +103,7 @@ while(1):
     cv.imshow(window_name,mask)
 
     k = cv.waitKey(1) & 0xFF
-    if k == 27: # esc key
+    if k == 27 or k == ord('q'): # esc key
         break
     # get current positions of Upper HSV trackbars
     uh = cv.getTrackbarPos('UpperH',window_name)

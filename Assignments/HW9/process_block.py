@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import imutils
 import time
+import math
 
 import sys
 sys.path.append('../../utils')
@@ -15,6 +16,7 @@ global win_pts
 def onmouse(event, x, y, flags, param):
     global win_pts
     if event == cv2.EVENT_LBUTTONUP:
+        print(f"x: {x} , y: {y}")
         if len(win_pts) < 2:
             win_pts.append((x, y))
         else:
@@ -23,12 +25,13 @@ def onmouse(event, x, y, flags, param):
 
 class block_calibration:
     def __init__(self):
-        self.f = None
-        self.w = None
-        self.h = None
+        self.f_v = None
+        self.obj_ht = None
+        self.obj_wt = None
         
-    def get_f(self, camera:RasPiCamera):
+    def get_f(self, camera:RasPiCamera, ):
         global win_pts
+        print('Entering Calibraion Block')
         win_pts = []
         win_name = 'calibration_block'
         img = camera.capture()
@@ -37,13 +40,67 @@ class block_calibration:
         while 1:
             cv2.imshow(win_name, img)
             k = cv2.waitKey(1) & 0xFF
-            if k == 27 or ord('q'): # esc key
+            # exit
+            if k == 27 or k == ord('q'): # esc key
+                print("exit")
                 break
+            # New Image
             if k == ord('n'):
                 img = camera.capture()
                 win_pts = []
+            # cancel selected points
+            if k == ord('c'):
+                win_pts = []
+            # Vertical calibration
+            if k == ord('v'):
+                print("Vertical Calibration")
+                v_pix = abs(win_pts[0][1] - win_pts[1][1])
+                print(f"Vertical pixels = {v_pix} ({win_pts[0][1]} - {win_pts[1][1]})")
+                print(f"Horizantal pixels = {abs(win_pts[0][0] - win_pts[1][0])}")
+                obj_dist = int(input("Enter z-axis distance(cm): "))
+                self.obj_ht = int(input("Enter object height(cm): "))
+                self.f_v = (obj_dist*v_pix)/self.obj_ht
+                print(f'Vertical focal length calculated : {self.f_v} (cm)')
+            # Horizontal Calibration
+            if k == ord('h'):
+                print("Horizantal Calibration")
+                h_pix = abs(win_pts[0][0] - win_pts[1][0])
+                print(f"Vertical pixels = abs(win_pts[0][1] - win_pts[1][1])")
+                print(f"Horizontal pixels = {v_pix}")
+                obj_dist = int(input("Enter z-axis distance(cm): "))
+                self.obj_wt = int(input("Enter object width(cm): "))
+                self.f_h = (obj_dist*h_pix)/self.obj_wt
+                print(f'Vertical focal length calculated : {self.f_h} (cm)')
+            # Test mode Vertical
+            if k == ord("l"):
+                print('Test Mode Vertical')
+                v_pix = abs(win_pts[0][1] - win_pts[1][1])
+                print(f"Vertical pixels = {v_pix}")
+                z_dist = (self.f_v*self.obj_ht)/v_pix
+                print(f'z - axis distance calculated : {z_dist} (cm)')
+            # Test Angle
+            if k == ord('a'):
+                print("Angle Testing")
+                print(img.shape)
+                c_pix = img.shape[1]/2 - win_pts[0][0]
+                print(f"Pixels from center = {c_pix}")
+                h_dist = (z_dist*c_pix)/self.f_v
+                angle = math.degrees(math.atan(abs(h_dist)/z_dist))
+                if h_dist <= 0 :
+                    angle = -angle
+                print(f'h_dist = {h_dist} cm')
+                print(f'angle = {angle} degrees')
+            # Test mode horizontal
+            if k == ord("w"):
+                print('Test Mode Horizontal')
+                h_pix = abs(win_pts[0][0] - win_pts[1][0])
+                print(f"Horizontal pixels = {h_pix}")
+                z_dist = (self.f_h*self.obj_wt)/h_pix
+                print(f'z - axis distance calculated : {z_dist} (cm)')
+            # plot points
             for pt in win_pts:
                 cv2.circle(img, pt, 4, (255, 255, 0), -1)
+                
         cv2.destroyWindow(win_name)
 
 class process_block:

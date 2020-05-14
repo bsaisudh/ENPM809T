@@ -24,12 +24,29 @@ def onmouse(event, x, y, flags, param):
             win_pts.append((x,y))
 
 class block_calibration:
-    def __init__(self):
-        self.f_v = None
-        self.obj_ht = None
-        self.obj_wt = None
+    def __init__(self, _f_v = None, _obj_ht = None, _obj_wt = None):
+        self.f_v = _f_v
+        self.obj_ht = _obj_ht
+        self.obj_wt = _obj_wt
+    
+    def calc_z_dist(self, v_pix):
+        z_dist = (self.f_v*self.obj_ht)/v_pix
+        return z_dist
+    
+    def calc_h_offset(self, v_pix, c_pix):
+        z_dist = self.calc_z_dist(v_pix)
+        h_dist = (z_dist*c_pix)/self.f_v 
+        return h_dist
         
-    def get_f(self, camera:RasPiCamera, ):
+    def calc_angle(self, v_pix, c_pix):
+        h_dist = self.calc_h_offset(v_pix, c_pix)
+        z_dist = self.calc_z_dist(v_pix)
+        angle = math.degrees(math.atan(abs(h_dist)/z_dist))
+        if h_dist <= 0 :
+            angle = -angle
+        return angle
+    
+    def get_f(self, camera:RasPiCamera):
         global win_pts
         print('Entering Calibraion Block')
         win_pts = []
@@ -76,7 +93,7 @@ class block_calibration:
                 print('Test Mode Vertical')
                 v_pix = abs(win_pts[0][1] - win_pts[1][1])
                 print(f"Vertical pixels = {v_pix}")
-                z_dist = (self.f_v*self.obj_ht)/v_pix
+                z_dist = self.calc_z_dist(v_pix)
                 print(f'z - axis distance calculated : {z_dist} (cm)')
             # Test Angle
             if k == ord('a'):
@@ -84,11 +101,10 @@ class block_calibration:
                 print(img.shape)
                 c_pix = img.shape[1]/2 - win_pts[0][0]
                 print(f"Pixels from center = {c_pix}")
-                h_dist = (z_dist*c_pix)/self.f_v
-                angle = math.degrees(math.atan(abs(h_dist)/z_dist))
-                if h_dist <= 0 :
-                    angle = -angle
+                h_dist = self.calc_h_offset(v_pix, c_pix)
+                angle = self.calc_angle(v_pix, c_pix)
                 print(f'h_dist = {h_dist} cm')
+                print(f'z_dist = {z_dist} cm')
                 print(f'angle = {angle} degrees')
             # Test mode horizontal
             if k == ord("w"):
@@ -104,71 +120,92 @@ class block_calibration:
         cv2.destroyWindow(win_name)
 
 class process_block:
-    def __init__(self, color = "red"):
+    def __init__(self, _calib:block_calibration , color = "red"):
+        self.calib = _calib
+        if color == "red":
+            self.low = np.array([0, 70, 50])
+            self.high = np.array([180, 255, 255])
+            self.hsv_low = np.array([10, 255, 255])
+            self.hsv_high = np.array([170, 70, 50])
         
-        if color == 'red':
-            self.low = [0, 70, 50]
-            self.high = [180, 255, 255]
-            self.hsv_low = [170, 70, 50]
-            self.hsv_high = [10, 255, 255]
-        
-    def threshold_hsv_red(self, frame):
+    def center_hieght(self, frame):
         """
         HSV Thresolding of the Red color in given frame
         """
 
-        image = frame.copy()
+        img = frame.copy()
+        img = cv2.medianBlur(img,5)
 
         # Covert BGR to HSV
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        # Green Color HSV Range
-        lower_red = np.array([50, 100, 100])
-        upper_red = np.array([90, 255, 255])
-
-        # Thresolding HSV range to get only green mask
-        mask_red = cv2.inRange(hsv, lower_red, upper_red)
-        masked_image =  cv2.bitwise_and(image, image, mask=mask_red)
-
-        self.mask_hsv_comparision = np.hstack((image, hsv, masked_image))
-
+        # Threshold the HSV image to get only Red colors
+        mask1 = cv2.inRange(hsv, self.low, self.hsv_low)
+        mask2 = cv2.inRange(hsv, self.hsv_high, self.high)
+        mask = cv2.bitwise_or(mask1,mask2)
+        
         # Morphological Operation - Opening
-        mask_red = cv2.erode(mask_green, None, iterations=2)
-        mask_red = cv2.dilate(mask_green, None, iterations=2)
+        mask = cv2.erode(mask, None, iterations=2)
+        mask = cv2.dilate(mask, None, iterations=2)
 
         # Find contours
-        contours = cv2.findContours(mask_green.copy(),
+        contours = cv2.findContours(mask.copy(),
                                     cv2.RETR_EXTERNAL,
                                     cv2.CHAIN_APPROX_SIMPLE)
         contours = contours[0] if imutils.is_cv2() else contours[1]
 
-        # Finding green light
-        center = None
+        # Finding object parameters
+        self.center_obj = None
+        self.hieght_pix = None
 
         if len(contours) > 0:
             c = max(contours, key=cv2.contourArea)
             ((x, y), radius) = cv2.minEnclosingCircle(c)
             # Reference : https://stackoverflow.com/questions/22470902/understanding-moments-function-in-opencv
             M = cv2.moments(c)
-            center = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
-
-            if radius > 10:
-                cv2.circle(image, 
+            self.center_obj = (int(M["m10"]/M["m00"]), int(M["m01"]/M["m00"]))
+            self.hieght_pix = None
+            if radius > 20:
+                cv2.circle(img, 
                             (int(x), int(y)),
                             int(radius),
                             (0, 255, 255),
                             2)
-                cv2.circle(image,
-                            center,
+                cv2.circle(img,
+                            self.center_obj,
                             5,
                             (0, 0, 255),
                             -1)
-
-        return image
+                
+                x_min = max(int(x) - int(radius) - 10, 0)
+                x_max = min(int(x) + int(radius) + 10 , img.shape[1])
+                
+                y_min = max(int(y) - int(radius) - 10, 0)
+                y_max = min(int(y) + int(radius) + 10 , img.shape[0])
+                
+                img = cv2.rectangle(img,
+                                    (x_min, y_min),
+                                    (x_max, y_max),
+                                    (255, 255, 0),
+                                    2)
+                
+                roi = mask[y_min : y_max, x_min : x_max]
+                roi = roi.T
+                row_or = np.zeros(roi.shape[1])
+                
+                for row in roi:
+                    row_or = np.logical_or(row_or, row)
+                row_or = np.where(row_or == True)[0]
+                if row_or.size > 0:
+                    self.hieght_pix = abs(row_or[0] - row_or[-1])
+                
+        return img, self.hieght_pix, self.center_obj
     
-    def get_distance(self):
-        pass
-    
-    def display(self):
-        cv2.imshow("mask_hsv_comparison", self.mask_hsv_comparision)
+    def predict_dist_angle(self, img_shape):
+        if self.hieght_pix != None:
+            c_pix = img_shape[1]/2 - self.center_obj[0]
+            return self.calib.calc_z_dist(self.hieght_pix), \
+                   self.calib.calc_angle(self.hieght_pix, c_pix)
+        else:
+            return None, None
     

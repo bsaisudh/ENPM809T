@@ -42,7 +42,7 @@ class block_calibration:
         h_dist = self.calc_h_offset(v_pix, c_pix)
         z_dist = self.calc_z_dist(v_pix)
         angle = math.degrees(math.atan(abs(h_dist)/z_dist))
-        if h_dist <= 0 :
+        if h_dist > 0 :
             angle = -angle
         return angle
     
@@ -147,7 +147,7 @@ class process_block:
         # Morphological Operation - Opening
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
-
+        # cv2.imshow("mask", mask)
         # Find contours
         contours = cv2.findContours(mask.copy(),
                                     cv2.RETR_EXTERNAL,

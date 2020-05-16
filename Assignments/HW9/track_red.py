@@ -25,6 +25,17 @@ while 1:
         print("-------------")
         print(f'Distance = {dist}, Angle = {angle}')
         print(f'h =  {hieght}, c = {center}, ::{img.shape}::{img.shape[1]/2 - center[0]}')
+        cv2.putText(img,
+                    f'{dist:0.2f} cm @ {angle:0.2f} deg',
+                    (30, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1, (0, 255, 0), 2, cv2.LINE_AA)
+    else:
+        cv2.putText(img,
+                    f'Object Not Found',
+                    (30, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1, (0, 255, 0), 2, cv2.LINE_AA)
     cv2.imshow("thres", img)
     k = cv2.waitKey(1) & 0xFF
     if k == ord('q'):

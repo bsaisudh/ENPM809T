@@ -10,12 +10,16 @@ import numpy as np
 
 import sys
 sys.path.append('../../utils')
+sys.path.append('../..//Assignments/HW8')
 
 from video_recorder import RasPiCamera
 from encoder_class import encoder_class
 from motor_driver_class import motor_driver
 from imu_thread_class import imu_thread
 from servo_class import servo_class
+from pid_controller_class import pid_controller, controller_util
+
+from turn_imu_pid import turn_right_util
 
 focal_length = 514.2857142857143
 obj_hieght = 7
@@ -37,6 +41,9 @@ print("encoder inititalized")
 imu = imu_thread()
 imu.start_read()
 print("IMU inititalized and started to read")
+
+util_rt_turn = turn_right_util(motor, imu)
+pid_rt = pid_controller(util_rt_turn, 0.5, 0.05, 0.00001)
 
 def move_forward(distance):
     distance = min(distance, 20)
@@ -64,6 +71,22 @@ def move_reverse(distance):
     encoder.countRL_till(tics, tics)
     motor.pwm_gameover()
     
+def turn_imu_pid(turn_angle):
+    turn_angle = turn_angle/2
+    init_angle = imu.get_orientation()[0]
+
+    if (init_angle + turn_angle) >= 0 :
+        final_angle  = int((init_angle + turn_angle)%360)
+    else:
+        final_angle  = 360 - abs((init_angle + turn_angle))
+        
+    angle = imu.get_orientation()[0]
+    print(f'Move angle = {turn_angle} -- Inital angle = {init_angle} -- Final Angle =  {final_angle} -- Current angle = {angle}')
+    
+    util_rt_turn.set_sp(final_angle)
+    pid_rt.controller(1.5)
+    motor.pwm_gameover()
+    
 def turn_imu(turn_angle):
     init_angle = imu.get_orientation()[0]
 
@@ -77,7 +100,7 @@ def turn_imu(turn_angle):
     else:
         command = "pivotleft"
     
-    motor.pwm_drive(command, 55)
+    motor.pwm_drive(command, 70)
     
     angle = imu.get_orientation()[0]
     print(f'Move angle = {turn_angle} -- Inital angle = {init_angle} -- Final Angle =  {final_angle} -- Current angle = {angle}')
@@ -99,18 +122,22 @@ def turn_imu(turn_angle):
 def servo_grab():
     servo.set_dutycycle(9)
     time.sleep(1)
-    move_forward(13)
+    move_forward(14)
     time.sleep(1)
     servo.set_dutycycle(6)
     time.sleep(1)
     move_reverse(13)
+    time.sleep(1)
 
 def servo_drop():
-    turn_imu(90)
-    move_forward(50)
+    turn_imu_pid(90)
+    move_forward(20)
+    move_forward(20)
+    move_forward(20)
+    move_forward(20)
     servo.set_dutycycle(9)
-    time.sleep(1)
-    move_reverse(13)
+    time.sleep(2)
+    move_reverse(20)
     time.sleep(1)
     servo.set_dutycycle(5)
     time.sleep(1)
@@ -133,7 +160,7 @@ while 1:
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 255, 0), 2, cv2.LINE_AA)
         cv2.imshow("thres", img)
-        k = cv2.waitKey(1) & 0xFF
+        k = cv2.waitKey(10) & 0xFF
         if k == ord('q'):
             break
         time.sleep(0.5)
@@ -141,7 +168,7 @@ while 1:
             print("-------------")
             print(f'Distance = {dist}, Angle = {angle}')
             if not(angle < 6.34 and angle > 0.34):
-                turn_imu(angle-3.34)
+                turn_imu_pid(angle-3.34)
                 time.sleep(1)
             if dist > 24:
                 move_forward(dist-24)
@@ -164,3 +191,4 @@ servo.cleanup()
 cv2.destroyWindow('thres')
 cv2.destroyAllWindows()
 camera.cleanup()
+
